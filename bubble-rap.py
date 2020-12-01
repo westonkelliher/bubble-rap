@@ -342,7 +342,7 @@ def parse_args(args):
                 mode = "rhyme"
             elif arg == "--distance":
                 mode = "distance"
-            elif arg == "--use-first-consonargnt":
+            elif arg == "--use-first-consonant":
                 options["use-first-consonant"] = True
             elif arg == "--compare-leading-phonemes":
                 options["compare-leading-phonemes"] = True
