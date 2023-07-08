@@ -148,6 +148,121 @@ def standard_to_weston_phoneme(ph):
         #print("could not read "+ph)
         return('?', ph[1:])
 
+
+    
+# returns (starting_phoneme, rest_of_word)
+def westons_to_list(wesword):
+    ww = wesword
+    
+    # simple consonants
+    if ww.startswith('b'):
+        return ('b',ww[1:])    
+    elif ww.startswith('k'):
+        return ('k',ww[1:])    
+    elif ww.startswith('d'):
+        return ('d',ww[1:])    
+    elif ww.startswith('f'):
+        return ('f',ww[1:])    
+    elif ww.startswith('g'):
+        return ('g',ww[1:])    
+    elif ww.startswith('h'):
+        return ('h',ww[1:])    
+    elif ww.startswith('l'):
+        return ('l',ww[1:])    
+    elif ww.startswith('m'):
+        return ('m',ww[1:])    
+    elif ww.startswith('n'):
+        return ('n',ww[1:])
+    elif ww.startswith('p'):
+        return ('p',ww[1:])    
+    elif ww.startswith('R'):
+        return ('R',ww[1:])    
+    elif ww.startswith('s'):
+        return ('s',ww[1:])    
+    elif ww.startswith('t'):
+        return ('t',ww[1:])    
+    elif ww.startswith('v'):
+        return ('v',ww[1:])    
+    elif ww.startswith('w'):
+        return ('w',ww[1:])    
+    elif ww.startswith('y'):
+        return ('y',ww[1:])    
+    elif ww.startswith('z'):
+        return ('z',ww[1:])    
+
+    # complex consonants
+    elif ww.startswith('th'):
+        return ('th',ww[2:])    
+    elif ww.startswith('dh'):
+        return ('dh',ww[2:])    
+    elif ww.startswith('sh'):
+        return ('sh',ww[2:])
+    elif ww.startswith('zh'):
+        return ('zh',ww[2:])    
+    elif ww.startswith('ch'):
+        return ('ch',ww[2:])    
+    elif ww.startswith('j'):
+        return ('j',ww[1:])
+    elif ww.startswith('ng'):
+        return ('ng',ww[2:])    
+    
+    # r vowels
+    elif ww.startswith('Ir'):
+        return ('Ir', ww[2:])
+    elif ww.startswith('Ir'):
+        return ('Ir', ww[2:])    
+    elif ww.startswith('Er'):
+        return ('Er', ww[2:])
+    elif ww.startswith('Er'):
+        return ('Er', ww[2:])
+    elif ww.startswith('Ar'):
+        return ('Ar', ww[2:])
+    elif ww.startswith('or'):
+        return ('or', ww[2:])
+    elif ww.startswith('Or'):
+        return ('Or', ww[2:])
+    elif ww.startswith('Ur'):
+        return ('Ur', ww[2:])
+    elif ww.startswith('-r'):
+        return ('-r', ww[2:])
+
+    # complex vowels
+    elif ww.startswith('ow'):
+        return ('ow', ww[2:])
+    elif ww.startswith('oy'):
+        return ('oy', ww[2:])
+
+    # simple vowels
+    elif ww.startswith('a'):
+        return ('a', ww[1:])
+    elif ww.startswith('A'):
+        return ('A', ww[1:])
+    elif ww.startswith('e'):
+        return ('e', ww[1:])
+    elif ww.startswith('E'):
+        return ('E', ww[1:])
+    elif ww.startswith('i'):
+        return ('i', ww[1:])
+    elif ww.startswith('I'):
+        return ('I', ww[2:])
+    elif ww.startswith('o'):
+        return ('o', ww[1:])
+    elif ww.startswith('O'):
+        return ('O', ww[1:])
+    elif ww.startswith('u'):
+        return ('u', ww[1:])
+    elif ww.startswith('u'):
+        return ('u', ww[1:])
+    elif ww.startswith('U'):
+        return ('U', ww[1:])
+    elif ww.startswith('-'):
+        return ('-', ww[1:])
+
+    # non yet impl
+    else:
+        #print("could not read "+ph)
+        return('?', ww[1:])
+
 def to_mine_once(x):
     return standard_to_weston_phoneme(x)
 
@@ -164,7 +279,7 @@ def to_mine(phone):
     return w.strip()
 
 
-    
+
 def is_vowel(ph):
     return [ph] in [['Ir'], ['Ir'], ['Er'], ['Ar'], ['or'], ['Or'],
                     ['Ur'], ['-r'], ['ow'], ['oy'], ['a'], ['A'],
@@ -278,7 +393,12 @@ def word_distance(word1, word2):
     cv1 = to_cv_list(word1)
     cv2 = to_cv_list(word2)
     return cv_list_distance(cv1, cv2, WORD_WEIGHTS)
-    
+
+def wesword_distance(wesword, word2):
+    cv1 = wesword_to_cv_list(wesword)
+    cv2 = to_cv_list(word2)
+    return cv_list_distance(cv1, cv2, WORD_WEIGHTS)
+
 
 
 
@@ -292,12 +412,16 @@ def to_ph_list(word):
             ph_list.append(ph)
     return ph_list
     
-    
-# convert word into an alternating list of consonants and vowels, inserting
-# 0s (no sound) where necessary
-# List will be backwards (last consonant first)
-def to_cv_list(word):
-    ph_list = to_ph_list(word)
+
+def wesword_to_ph_list(wesword):
+    ph_list = []
+    while len(wesword):
+        ph, wesword = westons_to_list(wesword)
+        ph_list.append(ph)
+    return ph_list
+
+
+def ph_list_to_cv_list(ph_list):
     cv_list = []
     on_consonant = True
     for i in range(len(ph_list) - 1, -1, -1):
@@ -318,6 +442,17 @@ def to_cv_list(word):
     if on_consonant:
         cv_list.append(['0'])
     return cv_list
+
+def wesword_to_cv_list(wesword):
+    ph_list = wesword_to_ph_list(wesword)
+    return ph_list_to_cv_list(ph_list)
+
+# convert word into an alternating list of consonants and vowels, inserting
+# 0s (no sound) where necessary
+# List will be backwards (last consonant first)
+def to_cv_list(word):
+    ph_list = to_ph_list(word)
+    return ph_list_to_cv_list(ph_list)
 
                 
     
@@ -358,6 +493,8 @@ def parse_args(args):
         i += 1
     return mode, options, direct_args
 
+def is_wesword(word):
+    return word.startswith('[') and word.endswith(']')
 
     
 # ---- main ----
@@ -388,7 +525,11 @@ def main():
     elif mode == "rhyme":
         assert len(args) == 1
         inword = args[0]
-        distances = [[w, word_distance(inword, w)] for w in WORDS]
+        if is_wesword(inword):
+            inword = inword[1:-1]
+            distances = [[w, wesword_distance(inword, w)] for w in WORDS]
+        else:
+            distances = [[w, word_distance(inword, w)] for w in WORDS]
         distances.sort(key=lambda x: x[1])
         for i in range(options["number"]):
             print(distances[i][0])
